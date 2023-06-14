@@ -14,7 +14,7 @@ public class NeighborhoodCommunityManagement {
 
     public static void main(String[] args) {
         loadNeighborsFromFile("vecinos.txt");
-        cleaningCompany = new CleaningCompany("ABC Cleaning", "123 Main St", 50.0); // Create the CleaningCompany object
+        cleaningCompany = new CleaningCompany("Cleaning Toledo", "Toledo St", 10.0); // Create the CleaningCompany object
         showMainMenu();
     }
 
@@ -81,59 +81,56 @@ public class NeighborhoodCommunityManagement {
             System.out.println("5. Show sum of annual taxes raised by the community");
             System.out.println("6. Show taxes to be paid by a neighbor");
             System.out.println("7. Show annual cleaning cost for the community");
-            System.out.println("8. Add a new sneighnor");
+            System.out.println("8. Add a new neighbor");
             System.out.println("9. Show average taxes paid by tenants or landlords");
-
-           
-
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            if (scanner.hasNextInt()) {
+                int choice = scanner.nextInt();
+                scanner.nextLine();
 
-            switch (choice) {
-                case 1:
-                    showAllNeighborInformation();
-                    break;
-                case 2:
-                    makeImprovementRequest(scanner);
-                    break;
-                case 3:
-                    showNeighborWithHighestTaxes();
-                    break;
-                case 4:
-                	showHighUrgencyRequests();
-                    break;
-                case 5:
-                    showSumOfAnnualTaxes();
-                    break;
-                case 6:
-                    showTaxesForNeighbor(scanner);
-                    break;
-                case 7:
-                    showAnnualCleaningCost();
-                    break;
-                    
-                case 8:
-                	addNeighbor(scanner);
-                	break;
-                case 9:
-                    showAverageTaxesPaid(scanner);
-                    break;
-                	
-                	
-                case 0:
-                    System.out.println("Goodbye!");
-                    scanner.close();
-                    System.exit(0);
-                default:
-                    System.out.println("Invalid choice. Please try again.");
+                switch (choice) {
+                    case 1:
+                        showAllNeighborInformation();
+                        break;
+                    case 2:
+                        makeImprovementRequest(scanner);
+                        break;
+                    case 3:
+                        showNeighborWithHighestTaxes();
+                        break;
+                    case 4:
+                        showHighUrgencyRequests();
+                        break;
+                    case 5:
+                        showSumOfAnnualTaxes();
+                        break;
+                    case 6:
+                        showTaxesForNeighbor(scanner);
+                        break;
+                    case 7:
+                        showAnnualCleaningCost();
+                        break;
+                    case 8:
+                        addNeighbor(scanner);
+                        break;
+                    case 9:
+                        showAverageTaxesPaid(scanner);
+                        break;
+                    case 0:
+                        System.out.println("Goodbye!");
+                        scanner.close();
+                        System.exit(0);
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine(); // Clear the input
             }
         }
     }
-
-    
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------
@@ -284,7 +281,7 @@ public class NeighborhoodCommunityManagement {
                 System.out.println("Maximum number of requests reached for this neighbor.");
             }
         } else {
-            System.out.println("Neighbor not found.");
+            System.out.println("Neighbor not found. Please add with option 8 on the menu.");
         }
     }
 
@@ -359,6 +356,8 @@ public class NeighborhoodCommunityManagement {
     }
 
    */ 
+    
+    /*
    
 
     private static List<ImprovementRequest> getHighUrgencyRequests(Neighbor neighbor) {
@@ -373,7 +372,7 @@ public class NeighborhoodCommunityManagement {
         return highUrgencyRequests;
     }
 
-
+*/
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -386,11 +385,10 @@ public class NeighborhoodCommunityManagement {
 
     private static boolean canMakeRequest(Neighbor neighbor) {
         long requestCount = requests.stream()
-                .filter(req -> req.getDescription().equalsIgnoreCase(neighbor.getName()))
+                .filter(req -> req.getNeighbor().equals(neighbor))
                 .count();
         return requestCount < 10;
     }
-
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------
@@ -486,18 +484,23 @@ public class NeighborhoodCommunityManagement {
         double basePrice;
         double surcharge;
 
-        if (neighbor.getType().equalsIgnoreCase("p")) {
+        if (neighbor.getType().equalsIgnoreCase("p")) { // Landlord
             basePrice = 650;
             int age = 2023 - neighbor.getYear();
 
             if (age > 17) {
                 surcharge = basePrice * 0.12;
             } else {
-                surcharge = basePrice * 0.1;
+                surcharge = basePrice * 0.10;
             }
-        } else if (neighbor.getType().equalsIgnoreCase("i")) {
+        } else if (neighbor.getType().equalsIgnoreCase("i")) { // Tenant
             basePrice = 450;
-            surcharge = basePrice * 0.05;
+
+            if (neighbor.getRental() > 500) {
+                surcharge = basePrice * 0.11;
+            } else {
+                surcharge = basePrice * 0.05;
+            }
         } else {
             // Invalid neighbor type
             return 0.0;
@@ -505,7 +508,6 @@ public class NeighborhoodCommunityManagement {
 
         return basePrice + surcharge;
     }
-
 
 
 //----------------------------------------------------------------------------------------------------------------------------------------
@@ -521,8 +523,10 @@ public class NeighborhoodCommunityManagement {
         System.out.println("\nAnnual cleaning cost for the community:");
         double costPerStairs = cleaningCompany.getCostPerStairs();
         int numStairs = getNumStairs();
-        double annualCost = costPerStairs * numStairs;
-        System.out.println(annualCost + " EUR");
+        double annualCost = costPerStairs * numStairs * 12;
+        System.out.println("Number of stairs: " + numStairs + ", Cost per stairs: " + costPerStairs +  "\nMonthly cleaning cost: " + numStairs * costPerStairs + " EUR" );
+
+        System.out.println("Annual cleaning cost: " + annualCost + " EUR");
     }
 
 
@@ -636,6 +640,12 @@ public class NeighborhoodCommunityManagement {
     private static void addNeighbor(Scanner scanner) {
         System.out.print("\nEnter neighbor type (p: Landlord, i: Tenant): ");
         String type = scanner.nextLine();
+
+        if (!type.equalsIgnoreCase("p") && !type.equalsIgnoreCase("i")) {
+            System.out.println("Invalid neighbor type. Please enter 'p' for Landlord or 'i' for Tenant.");
+            return;
+        }
+
         System.out.print("Enter neighbor name: ");
         String name = scanner.nextLine();
         System.out.print("Enter neighbor NIF: ");
@@ -646,17 +656,8 @@ public class NeighborhoodCommunityManagement {
             return;
         }
 
-        String flatNumber;
-        while (true) {
-            System.out.print("Enter flat number: ");
-            flatNumber = scanner.nextLine();
-
-            if (isFlatNumberUnique(flatNumber)) {
-                break;
-            } else {
-                System.out.println("Flat number already exists. Please enter a unique flat number.");
-            }
-        }
+        System.out.print("Enter flat number: ");
+        String flatNumber = scanner.nextLine();
 
         int year = 0; // Default value for year
         double rental = 0.0; // Default value for rental
@@ -669,9 +670,6 @@ public class NeighborhoodCommunityManagement {
             System.out.print("Enter monthly rental: ");
             rental = scanner.nextDouble();
             scanner.nextLine();
-        } else {
-            System.out.println("Invalid neighbor type. Please try again.");
-            return;
         }
 
         Neighbor neighbor;
@@ -699,15 +697,6 @@ public class NeighborhoodCommunityManagement {
         } catch (IOException e) {
             System.out.println("An error occurred while writing to the file.");
         }
-    }
-
-    private static boolean isFlatNumberUnique(String flatNumber) {
-        for (Neighbor neighbor : neighbors) {
-            if (neighbor.getFlatNumber().equalsIgnoreCase(flatNumber)) {
-                return false;
-            }
-        }
-        return true;
     }
 
 
